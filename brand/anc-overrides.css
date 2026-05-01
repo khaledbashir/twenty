@@ -6,3 +6,48 @@
 [class*="upgrade-badge"],
 [data-testid*="upgrade-tag"],
 [class*="pro-badge"] { display: none !important; }
+
+/* Hide "Documentation" link in nav (links to Twenty docs — irrelevant for ANC users) */
+a[href*="twenty.com"],
+a[href*="docs.twenty"] {
+  display: none !important;
+}
+
+/* When loaded inside services-dashboard's iframe (?embed=1 or cross-origin
+ * parent), hide Twenty's left navigation drawer and command palette/topbar
+ * so the services-dashboard sidebar is the only chrome. Users navigate ops
+ * via services-dashboard nav which deep-links to specific Twenty objects. */
+html.anc-embed [data-testid*="navigation-drawer"],
+html.anc-embed nav[role="navigation"],
+html.anc-embed [class*="NavigationDrawer"],
+html.anc-embed [class*="navigation-drawer"],
+html.anc-embed [data-testid*="cmd-k"],
+html.anc-embed [data-testid*="command-menu"],
+html.anc-embed [class*="CommandMenu"],
+html.anc-embed [data-testid*="navbar"],
+html.anc-embed aside {
+  display: none !important;
+}
+html.anc-embed [data-testid*="page-header"],
+html.anc-embed main {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* Hide Twenty's standard CRM objects (Companies, People, Opportunities,
+ * Tasks, Notes, Workflows, Dashboards) from the left sidebar — irrelevant for
+ * ops workspace which only deals with custom objects (Walkthroughs, Issues,
+ * Maintenance, etc.). Targets sidebar items by their href routes (Twenty
+ * uses /objects/<plural-name>). Applies in both embed and standalone modes
+ * because this is an ops-only workspace; CRM stuff lives at crm.ancsports.net. */
+a[href="/objects/companies"],
+a[href="/objects/people"],
+a[href="/objects/opportunities"],
+a[href="/objects/tasks"],
+a[href="/objects/notes"],
+a[href="/objects/messageThreads"],
+a[href="/objects/calendarEvents"],
+a[href^="/dashboards"],
+a[href^="/workflows"] {
+  display: none !important;
+}
