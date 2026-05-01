@@ -36,4 +36,9 @@ RUN sed -i 's|<title>Twenty</title>|<title>ANC Operations</title>|g' /app/packag
 # Patch manifest.json brand name
 RUN sed -i 's/"Twenty"/"ANC Operations"/g; s/"twenty"/"anc-operations"/g' /app/packages/twenty-server/dist/front/manifest.json || true
 
+# Replace the hardcoded "twentyhq.github.io/.../twenty-logo.png" default workspace logo URL
+# inside the built JS bundle so the favicon/nav default to our ANC logo.
+RUN find /app/packages/twenty-server/dist/front/assets -name "*.js" -type f \
+    -exec sed -i 's|https://twentyhq\.github\.io/placeholder-images/workspaces/twenty-logo\.png|/images/anc-logo.png|g' {} +
+
 EXPOSE 3000
