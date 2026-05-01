@@ -103,6 +103,22 @@
     }, 1000);
   }
 
+  // Detect iframe-embed mode: either ?embed=1 in URL or running inside a frame
+  // whose parent is on services.ancsports.net. Sets html.anc-embed so the CSS
+  // overrides hide Twenty's own nav chrome (services-dashboard's sidebar is
+  // the only nav surface in that mode).
+  function applyEmbedClass() {
+    try {
+      const isEmbed = new URLSearchParams(location.search).has('embed') ||
+                      (window.self !== window.top);
+      if (isEmbed) document.documentElement.classList.add('anc-embed');
+    } catch (e) {
+      // cross-origin parent throws — that's the strongest signal we're embedded
+      document.documentElement.classList.add('anc-embed');
+    }
+  }
+  applyEmbedClass();
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
