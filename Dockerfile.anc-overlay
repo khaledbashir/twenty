@@ -1,0 +1,39 @@
+# ANC Operations — overlay Dockerfile (Twenty source build OOMs on EasyPanel,
+# so we layer ANC branding on top of the official twentycrm/twenty:latest image).
+#
+# What's swapped: every Android/iOS icon, favicon, og:title/twitter:title in
+# index.html, integration logo. Plus an injected JS scrubber that runs
+# MutationObserver on every page to remove leftover "Twenty" text strings
+# from the bundled JS (same trick used for NocoDB rebrand).
+#
+# EasyPanel: Source = GitHub khaledbashir/twenty branch anc-ops-rebrand,
+#            Build  = Dockerfile.anc-overlay (root)
+
+FROM twentycrm/twenty:latest
+
+# --- Stage ANC brand assets ---
+COPY brand/anc-logo.png         /app/packages/twenty-server/dist/front/images/anc-logo.png
+COPY brand/anc-favicon.ico      /app/packages/twenty-server/dist/front/favicon.ico
+COPY brand/anc-overrides.css    /app/packages/twenty-server/dist/front/anc-overrides.css
+COPY brand/anc-scrub.js         /app/packages/twenty-server/dist/front/anc-scrub.js
+
+USER root
+
+# --- Replace ALL Android + iOS icon sizes with the ANC logo ---
+RUN set -e \
+ && find /app/packages/twenty-server/dist/front/images/icons -type f -name "*.png" -exec cp /app/packages/twenty-server/dist/front/images/anc-logo.png {} \; \
+ && find /app/packages/twenty-server/dist/front/images/integrations -type f -name "twenty-logo.svg" -delete || true \
+ && find /app/packages/twenty-server/dist/front -type f -name "favicon*" -exec cp /app/packages/twenty-server/dist/front/favicon.ico {} \;
+
+# --- Patch index.html: page title + meta tags + inject overrides ---
+RUN sed -i 's|<title>Twenty</title>|<title>ANC Operations</title>|g' /app/packages/twenty-server/dist/front/index.html \
+ && sed -i 's|property="og:title" content="Twenty"|property="og:title" content="ANC Operations"|g' /app/packages/twenty-server/dist/front/index.html \
+ && sed -i 's|name="twitter:title" content="Twenty"|name="twitter:title" content="ANC Operations"|g' /app/packages/twenty-server/dist/front/index.html \
+ && sed -i 's|content="A modern open-source CRM"|content="ANC Operations Platform"|g' /app/packages/twenty-server/dist/front/index.html \
+ && grep -q "anc-overrides.css" /app/packages/twenty-server/dist/front/index.html || \
+    sed -i 's|</head>|<link rel="stylesheet" href="/anc-overrides.css"><script src="/anc-scrub.js" defer></script></head>|' /app/packages/twenty-server/dist/front/index.html
+
+# Patch manifest.json brand name
+RUN sed -i 's/"Twenty"/"ANC Operations"/g; s/"twenty"/"anc-operations"/g' /app/packages/twenty-server/dist/front/manifest.json || true
+
+EXPOSE 3000

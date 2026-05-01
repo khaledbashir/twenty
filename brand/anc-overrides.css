@@ -1,0 +1,8 @@
+/* ANC Operations theme overrides for embedded Twenty */
+:root {
+  --anc-brand: #0A52EF;
+}
+/* Hide any leftover marketing/upsell badges */
+[class*="upgrade-badge"],
+[data-testid*="upgrade-tag"],
+[class*="pro-badge"] { display: none !important; }
